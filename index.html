@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Wheelbarrow</title>
+    <meta charset="utf-8">
+    <meta name="description" content="&lt;model-viewer&gt; template">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" href="./styles.css" rel="stylesheet"/>
+  </head>
+  <body>
+    <!-- <model-viewer> HTML element -->
+    <model-viewer src="wheelbarrow.glb"
+	ar ar-modes="webxr scene-viewer quick-look"
+	camera-controls
+	interpolation-decay="200"
+	tone-mapping="aces" poster="poster.png"
+	min-camera-orbit="auto 1deg auto" max-camera-orbit="auto 93deg auto"
+	camera-orbit="47.19deg 70.78deg 3.613m"
+	camera-target="0.2m 0.25m 0m"
+	field-of-view="24deg"
+	skybox-image="hdri/derelict_airfield_02_2k.hdr"
+	skybox-height="0.6m"
+	environment-rotation="90deg"
+	shadow-intensity="1.2"
+	interaction-prompt="none"
+	class="hotspots-hidden"
+	animation-loop="false"
+	id='gear'>
+      
+	<button class="view-button" slot="hotspot-1"
+		data-surface="2 0 588 587 591 0.164 0.202 0.635"
+		data-visibility-attribute="visible"
+		data-target="-0.6m 0.18m -0.1m"
+		data-orbit="65deg 90deg 2.65m"
+		data-visibility-attribute="visible"
+	    onMouseOver="addhotspot1()"  onMouseOut="removehotspot1()">
+        <div class="hotspotAnnotation" id="hotspot1" style="visibility:hidden">wheel</div>
+		</button>
+
+	<button class="view-button" slot="hotspot-2"
+		data-surface="1 0 258 218 222 0.106 0.798 0.095"
+		data-visibility-attribute="visible"
+		data-target="-0.5m -0.5m -0.5m"
+		data-orbit="50deg 54deg 2.65m"
+		data-visibility-attribute="visible"
+	    onMouseOver="addhotspot2()"  onMouseOut="removehotspot2()">
+        <div class="hotspotAnnotation" id="hotspot2" style="visibility:hidden">bin</div>
+		</button>
+
+	<button class="view-button" slot="hotspot-3"
+		data-surface="4 0 1225 1236 1274 0.037 0.899 0.064"
+		data-visibility-attribute="visible"
+		data-target="-0.5m 0.0m 0.2m"
+		data-orbit="140deg 68deg 2.0m"
+		data-visibility-attribute="visible"
+	    onMouseOver="addhotspot3()"  onMouseOut="removehotspot3()">
+        <div class="hotspotAnnotation" id="hotspot3" style="visibility:hidden">handle</div>
+		</button>
+	
+	<div class="progress-bar hide" slot="progress-bar">
+        <div class="update-bar"></div>
+		</div>
+		
+    <button slot="ar-button" id="ar-button">
+        View in your space
+		</button>
+		
+	<div id="ar-prompt">
+		<img src="ar_hand_prompt.png">
+		</div>
+		
+</model-viewer>
+ 
+ 	<div class="top-banner">
+		Wheelbarrow 3D Viewer
+		</div>
+		
+	<div class="bottom-banner">
+		<div class="banner-section">
+			<normal>Hotspots:</normal>
+			<button id="toggle-hotspots">Show</button>
+			</div>
+
+		<div class="banner-section">
+			<normal>View:</normal>
+			<button onclick="setView('0deg 74deg 3.4m',  '0.3m 0.2m 0m')">Front</button>
+			<button onclick="setView('0deg 0deg 3.8m',   '0.3m 0.6m 0m')">Top</button>
+			<button onclick="setView('90deg 90deg 3.4m', '0.3m 0.4m 0m')">Side</button>
+			</div>
+
+		<div class="banner-section">
+			<normal>Variant:</normal>
+			<button onclick="VBtn01()">Red</button>
+			<button onclick="VBtn02()">Green</button>
+			</div>
+
+		<div class="banner-section">
+			<normal>Animation:</normal>
+			<button onclick="Btn01()">Tilt</button>
+			<button onclick="Btn02()">Roll</button>
+			<button onclick="Btn03()">Explode</button>
+			<button onclick="pauseAnimation()">Pause</button>
+			</div>
+			
+		<div class="banner-section">
+			<normal>Environment</normal>
+			<button id="toggle-skybox" aria-pressed="true">Show</button>
+			</div>
+			</div>
+ 
+ 
+ 
+
+
+<script type="module">
+                  const modelViewer2 = document.querySelector("#gear");
+                  
+				  const annotationClicked = (annotation) => {
+                    let dataset = annotation.dataset;
+                    modelViewer2.cameraTarget = dataset.target;
+                    modelViewer2.cameraOrbit = dataset.orbit;
+                    modelViewer2.fieldOfView = '45deg';
+                  }
+
+                  modelViewer2.querySelectorAll('button[slot^="hotspot-"]').forEach((hotspot) => {
+                    hotspot.addEventListener('click', () => annotationClicked(hotspot));
+                  });
+				    
+				  const mv = document.querySelector('#gear');
+				  const toggleBtn = document.querySelector('#toggle-hotspots');
+
+				  const updateToggleButtonLabel = () => {
+				  const hidden = mv.classList.contains('hotspots-hidden');
+				  toggleBtn.textContent = hidden ? 'Show' : 'Hide';
+				  toggleBtn.setAttribute('aria-pressed', String(hidden));
+				  };
+
+				  toggleBtn.addEventListener('click', () => {
+				  mv.classList.toggle('hotspots-hidden');
+				  updateToggleButtonLabel();
+				  });
+
+				  updateToggleButtonLabel()
+				  
+				  window.setView = (orbit, target) => {
+				  if (orbit)  mv.cameraOrbit  = orbit;
+				  if (target) mv.cameraTarget = target;
+				  mv.fieldOfView = '45deg';};
+  
+				 
+const skyboxToggleBtn = document.querySelector('#toggle-skybox');
+
+if (!mv.dataset.skybox) {
+  const currentSky = mv.getAttribute('skybox-image');
+  if (currentSky) mv.dataset.skybox = currentSky;
+}
+
+function setSkyboxVisible(visible) {
+  if (visible) {
+    if (!mv.getAttribute('skybox-image') && mv.dataset.skybox) {
+      mv.setAttribute('skybox-image', mv.dataset.skybox);
+    }
+    skyboxToggleBtn.textContent = 'Hide';
+	skyboxToggleBtn.setAttribute('aria-pressed', 'false');
+  } else {
+    mv.removeAttribute('skybox-image');
+    skyboxToggleBtn.textContent = 'Show';
+	skyboxToggleBtn.setAttribute('aria-pressed', 'true');    
+  }
+
+}
+
+setSkyboxVisible(true);
+
+skyboxToggleBtn.addEventListener('click', () => {
+  const visible = !!mv.getAttribute('skybox-image');
+  setSkyboxVisible(!visible);
+});
+
+  
+</script>
+
+
+
+
+</script>
+
+<script>
+				  function addhotspot1(){
+				  document.getElementById("hotspot1").style.visibility="visible"
+				  }
+				  function removehotspot1(){
+				  document.getElementById("hotspot1").style.visibility="hidden";
+				  }
+		  
+				  function addhotspot2(){
+				  document.getElementById("hotspot2").style.visibility="visible"
+				  }
+				  function removehotspot2(){
+				  document.getElementById("hotspot2").style.visibility="hidden";
+				  }
+
+				  function addhotspot3(){
+				  document.getElementById("hotspot3").style.visibility="visible"
+				  }
+				  function removehotspot3(){
+				  document.getElementById("hotspot3").style.visibility="hidden";
+				  }
+
+				  function VBtn01() {
+				  document.getElementById('gear').variantName = "V-red";
+				  }
+				  function VBtn02() {
+				  document.getElementById('gear').variantName = "V-green";
+				  }
+				  
+				  function Btn01() {
+				  document.getElementById('gear').pause();
+				  document.getElementById('gear').animationName = "ForwardTilt"; 
+				  document.getElementById('gear').play();
+				  }
+				  function Btn02() {
+				  document.getElementById('gear').pause();
+				  document.getElementById('gear').animationName = "Roll"; 
+				  document.getElementById('gear').play();
+				  }
+				  function Btn03() {
+				  document.getElementById('gear').pause();
+				  document.getElementById('gear').animationName = "Explode"; 
+				  document.getElementById('gear').play();
+				  }
+				  function pauseAnimation() {
+				  document.getElementById('gear').pause();
+				  }
+</script>
+
+<style>
+
+.view-button {
+background: #fff;}
+
+</style>
+
+    <script src="script.js"></script>
+
+    <!-- Loads <model-viewer> for browsers: -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+  </body>
+  
+</html>
+
+
+
